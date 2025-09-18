@@ -1,0 +1,75 @@
+/** Globals
+
+  These are global defaults
+  You may override them in the overrides.scss file
+
+  Table of contents:
+  * Fonts
+  * Colors
+  * Breakpoints
+
+ */
+
+/**
+ * Fonts
+ * Define site's fonts
+ */
+$base-font-urls: (
+    'https://fonts.googleapis.com/css?family=Raleway:100,300,400,700'
+  )!default;
+$base-font-family: 'Raleway', sans-serif !default;
+$base-font-size: 16 !default;
+$base-letter-spacing: 0.05em;
+
+/**
+ * Base Line Height
+ * Define vertical and horizantal rhythm of site
+ * this affects overall margins, paddings, and line height
+ * Define the base line height, which is a ratio (usually between 1.2 and 1.7)
+ * Default 1.618 for Golden Ratio
+ */
+$base-line-height: 1rem * 1.5!default;
+
+/**
+ * Base Scale
+ * Define typographic scale
+ * Options:
+ * minor-second
+ * major-second
+ * minor-third
+ * major-third
+ * perfect-forth
+ * augmented-forth
+ * perfect-fifth
+ * goldern-ratio
+ */
+$base-scale: 'perfect-forth';
+
+/**
+ * Colors
+ * Define site's color palette
+ */
+$color-white: #ffffff!default;
+$color-black: #000000!default;
+$color-red: #ff0030!default;
+$color-grey: #f1f1f1!default;
+
+/**
+ * Site width
+ * Define site's width
+ * This will define the container's width
+ * It will also help define the fluidity of the site
+ */
+$site-width: 1200;
+
+/**
+ * Breakpoints
+ * Define site's breakpoints
+ * range: (min, max)
+ */
+$breakpoints: (
+  mobile: (0, 599),
+  tablet-portrait: (600, 899),
+  tablet-landscape: (900, 1199),
+  desktop-up: (1200, 1800)
+);

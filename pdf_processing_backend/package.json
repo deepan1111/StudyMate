@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "tenacity": "^1.0.4"
+  }
+}

@@ -1,0 +1,9 @@
+$nav-color: #cccccc!default;
+.nav {
+  &__item {
+    display: inline-block;
+  }
+  &__link {
+    color: $nav-color;
+  }
+}

@@ -1,0 +1,6 @@
+body {
+  letter-spacing: $base-letter-spacing;
+  line-height: $base-line-height;
+
+  @extend %base-font-family;
+}

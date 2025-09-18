@@ -1,0 +1,4 @@
+@mixin type-setting($level: 0) {
+  font-size: type-scale($level);
+  line-height: baseline($level);
+}

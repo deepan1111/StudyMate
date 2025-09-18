@@ -1,0 +1,7 @@
+@function baseline($level) {
+  @if $level > 0 {
+    @return $base-line-height * 2;
+  } @else {
+    @return $base-line-height;
+  }
+}

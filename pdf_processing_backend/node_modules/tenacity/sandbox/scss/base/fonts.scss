@@ -1,0 +1,6 @@
+@each $url in $base-font-urls {
+  @import url($url);
+}
+%base-font-family {
+  font-family: $base-font-family;
+}

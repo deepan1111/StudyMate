@@ -1,0 +1,8 @@
+@function rem($values) {
+  $list: ();
+  @each $value in $values {
+    $rem: ($value / $base-font-size)+0rem;
+    $list: append($list, $rem);
+  }
+  @return $list;
+}

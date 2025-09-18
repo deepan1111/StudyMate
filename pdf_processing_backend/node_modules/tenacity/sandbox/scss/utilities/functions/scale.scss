@@ -1,0 +1,14 @@
+@function type-scale($level) {
+  $scales: (
+    minor-second: 1.067,
+    major-second: 1.125,
+    minor-third: 1.200,
+    major-third: 1.250,
+    perfect-forth: 1.333,
+    augmented-forth: 1.414,
+    perfect-fifth: 1.500,
+    goldern-ratio: 1.618
+  );
+  $chosenScale: map-get($scales, $base-scale);
+  @return pow($chosenScale, $level) + rem;
+}

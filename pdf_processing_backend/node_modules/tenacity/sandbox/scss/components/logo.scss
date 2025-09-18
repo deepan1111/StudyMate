@@ -1,0 +1,11 @@
+/** Logo
+  Site logo
+ */
+/**
+ * Defaults
+ */
+$logo-width: 163 !default;
+
+.logo {
+  width: rem($logo-width);
+}

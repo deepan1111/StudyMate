@@ -1,0 +1,70 @@
+$heading-font-thin-weight: 300!default;
+$heading-font-bold-weight: 700!default;
+
+%h {
+  margin: $base-line-height 0;
+  font-weight: $heading-font-bold-weight;
+}
+%h-thin {
+  font-weight: $heading-font-thin-weight;
+}
+.h1 {
+  @include type-setting(4);
+  @extend %h;
+  &--thin {
+    @extend %h-thin;
+  }
+  &--red {
+    color: $color-red;
+  }
+}
+.h2 {
+  @include type-setting(3);
+  @extend %h;
+  &--thin {
+    @extend %h-thin;
+  }
+  &--red {
+    color: $color-red;
+  }
+}
+.h3 {
+  @include type-setting(2);
+  @extend %h;
+  &--thin {
+    @extend %h-thin;
+  }
+  &--red {
+    color: $color-red;
+  }
+}
+.h4 {
+  @include type-setting(1);
+  @extend %h;
+  &--thin {
+    @extend %h-thin;
+  }
+  &--red {
+    color: $color-red;
+  }
+}
+.h5 {
+  @include type-setting(0);
+  @extend %h;
+  &--thin {
+    @extend %h-thin;
+  }
+  &--red {
+    color: $color-red;
+  }
+}
+.h6 {
+  @include type-setting(-1);
+  @extend %h;
+  &--thin {
+    @extend %h-thin;
+  }
+  &--red {
+    color: $color-red;
+  }
+}

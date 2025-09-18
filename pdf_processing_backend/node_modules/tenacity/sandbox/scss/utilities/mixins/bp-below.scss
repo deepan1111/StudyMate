@@ -1,0 +1,10 @@
+@mixin bp-below($bp) {
+  @each $device, $range in $breakpoints {
+    @if $bp == $device {
+      $max: nth($range, 1);
+      @media (max-width: $max) {
+        @content;
+      }
+    }
+  }
+}
