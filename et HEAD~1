@@ -1,0 +1,9 @@
+[33mcommit 5dcea62de883f473768253ca3827671db7245115[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfeature/initial-commit[m[33m)[m
+Author: Deepan1111 <deepanb777@gmail.com>
+Date:   Thu Sep 18 11:24:28 2025 +0530
+
+    remove large file
+
+ pdf_processing_backend/data/chunk_metadata.json | 1680 [32m++++++++++++++++++++++[m[31m-[m
+ pdf_processing_backend/data/faiss_index.bin     |  Bin [31m4697133[m -> [32m4789293[m bytes
+ 2 files changed, 1620 insertions(+), 60 deletions(-)

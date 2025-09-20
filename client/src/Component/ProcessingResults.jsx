@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
   FileText,
@@ -17,7 +16,8 @@ import {
   Zap,
   RefreshCw,
   Target,
-  Info
+  Info,
+  FileDown
 } from "lucide-react";
 import {
   formatProcessingStats,
@@ -37,6 +37,7 @@ const ProcessingResults = ({ results, onDocumentReady }) => {
   const [searching, setSearching] = useState(false);
   const [searchStats, setSearchStats] = useState(null);
   const [showSearchDebug, setShowSearchDebug] = useState(false);
+  const [exportFormat, setExportFormat] = useState("json");
 
   if (!results) return null;
 
@@ -66,16 +67,207 @@ const ProcessingResults = ({ results, onDocumentReady }) => {
     }
   };
 
-  const downloadResults = () => {
-    const dataStr = JSON.stringify(results, null, 2);
-    const dataUri =
-      "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
-    const exportFileDefaultName = "pdf_processing_results.json";
+  // Enhanced download function with PDF support
+  const downloadResults = async () => {
+    const timestamp = new Date().toISOString().split('T')[0];
+    
+    if (exportFormat === "json") {
+      const dataStr = JSON.stringify(results, null, 2);
+      const dataUri = "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
+      const exportFileDefaultName = `pdf_processing_results_${timestamp}.json`;
 
-    const linkElement = document.createElement("a");
-    linkElement.setAttribute("href", dataUri);
-    linkElement.setAttribute("download", exportFileDefaultName);
-    linkElement.click();
+      const linkElement = document.createElement("a");
+      linkElement.setAttribute("href", dataUri);
+      linkElement.setAttribute("download", exportFileDefaultName);
+      linkElement.click();
+    } else if (exportFormat === "pdf") {
+      await downloadAsPDF();
+    }
+  };
+
+  // PDF export function
+  const downloadAsPDF = async () => {
+    try {
+      // Dynamically import jsPDF to avoid bundle size issues
+      const { jsPDF } = await import('jspdf');
+      
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 20;
+      const maxWidth = pageWidth - (margin * 2);
+      let yPosition = margin;
+
+      // Helper function to add new page if needed
+      const checkPageBreak = (requiredHeight = 20) => {
+        if (yPosition + requiredHeight > pageHeight - margin) {
+          doc.addPage();
+          yPosition = margin;
+          return true;
+        }
+        return false;
+      };
+
+      // Helper function to split text into lines
+      const splitTextToLines = (text, maxWidth, fontSize = 10) => {
+        doc.setFontSize(fontSize);
+        return doc.splitTextToSize(text, maxWidth);
+      };
+
+      // Header
+      doc.setFontSize(20);
+      doc.setFont(undefined, 'bold');
+      doc.text('PDF Processing Results', margin, yPosition);
+      yPosition += 15;
+
+      // Timestamp
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'normal');
+      doc.text(`Generated on: ${new Date().toLocaleString()}`, margin, yPosition);
+      yPosition += 20;
+
+      // Process each document
+      documents.forEach(([filename, docData]) => {
+        // Document header
+        checkPageBreak(30);
+        doc.setFontSize(16);
+        doc.setFont(undefined, 'bold');
+        doc.text(filename, margin, yPosition);
+        yPosition += 10;
+
+        // Document metadata
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'normal');
+        const metadata = [
+          `Pages: ${docData.metadata?.page_count || 0}`,
+          `File Size: ${formatFileSize(docData.metadata?.file_size || 0)}`,
+          `Chunks: ${docData.chunks_count || docData.chunks?.length || 0}`
+        ].join(' • ');
+        doc.text(metadata, margin, yPosition);
+        yPosition += 15;
+
+        if (docData.success === false) {
+          // Error handling
+          doc.setTextColor(200, 0, 0);
+          doc.text(`Error: ${docData.error || "Processing failed"}`, margin, yPosition);
+          doc.setTextColor(0, 0, 0);
+          yPosition += 15;
+          return;
+        }
+
+        // Process chunks
+        const filteredChunks = getFilteredChunks(docData.chunks || []);
+        
+        if (filteredChunks.length === 0) {
+          doc.setTextColor(100, 100, 100);
+          doc.text('No chunks found matching the current filters.', margin, yPosition);
+          doc.setTextColor(0, 0, 0);
+          yPosition += 15;
+          return;
+        }
+
+        filteredChunks.forEach((chunk, index) => {
+          checkPageBreak(40);
+
+          // Chunk header
+          doc.setFontSize(12);
+          doc.setFont(undefined, 'bold');
+          const pageDisplay = chunk.page_numbers && chunk.page_numbers.length > 0
+            ? `Pages ${chunk.page_numbers.join(', ')} • `
+            : chunk.page_number 
+              ? `Page ${chunk.page_number} • `
+              : '';
+          doc.text(`${pageDisplay}Chunk #${index + 1}`, margin, yPosition);
+          yPosition += 8;
+
+          // Search score if available
+          const searchScore = getSearchScore(chunk.chunk_id);
+          if (searchScore) {
+            doc.setFontSize(9);
+            doc.setFont(undefined, 'normal');
+            doc.setTextColor(0, 100, 200);
+            doc.text(`Relevance Score: ${(searchScore.score * 100).toFixed(1)}%`, margin, yPosition);
+            doc.setTextColor(0, 0, 0);
+            yPosition += 6;
+          }
+
+          // Key terms
+          if (chunk.key_terms && chunk.key_terms.length > 0) {
+            doc.setFontSize(9);
+            doc.setTextColor(100, 0, 150);
+            doc.text(`Key Terms: ${chunk.key_terms.slice(0, 5).join(', ')}`, margin, yPosition);
+            doc.setTextColor(0, 0, 0);
+            yPosition += 6;
+          }
+
+          // Chunk text
+          if (chunk.text) {
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'normal');
+            const textLines = splitTextToLines(chunk.text, maxWidth, 10);
+            
+            textLines.forEach(line => {
+              checkPageBreak(6);
+              doc.text(line, margin, yPosition);
+              yPosition += 6;
+            });
+          }
+
+          // Metadata
+          if (chunk.word_count || chunk.char_count) {
+            yPosition += 3;
+            doc.setFontSize(8);
+            doc.setTextColor(100, 100, 100);
+            const metadata = [];
+            if (chunk.word_count) metadata.push(`Words: ${chunk.word_count}`);
+            if (chunk.char_count) metadata.push(`Characters: ${chunk.char_count}`);
+            doc.text(metadata.join(' • '), margin, yPosition);
+            doc.setTextColor(0, 0, 0);
+            yPosition += 8;
+          }
+
+          yPosition += 5; // Space between chunks
+        });
+
+        yPosition += 10; // Space between documents
+      });
+
+      // Footer with search info if applicable
+      if (searchResults && searchResults.results) {
+        checkPageBreak(30);
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'bold');
+        doc.text('Search Summary', margin, yPosition);
+        yPosition += 8;
+
+        doc.setFont(undefined, 'normal');
+        doc.setFontSize(9);
+        const searchInfo = [
+          `Query: "${searchTerm}"`,
+          `Method: ${searchResults.search_method}`,
+          `Results: ${searchResults.total_results}`,
+          searchResults.search_time ? `Time: ${(searchResults.search_time * 1000).toFixed(0)}ms` : ''
+        ].filter(Boolean);
+
+        searchInfo.forEach(info => {
+          checkPageBreak(6);
+          doc.text(info, margin, yPosition);
+          yPosition += 6;
+        });
+      }
+
+      // Save the PDF
+      const timestamp = new Date().toISOString().split('T')[0];
+      const filename = searchTerm 
+        ? `pdf_processing_results_search_${searchTerm.replace(/[^a-z0-9]/gi, '_')}_${timestamp}.pdf`
+        : `pdf_processing_results_${timestamp}.pdf`;
+      
+      doc.save(filename);
+
+    } catch (error) {
+      console.error("Failed to generate PDF:", error);
+      alert("Failed to generate PDF. Please try again or use JSON export.");
+    }
   };
 
   // Enhanced semantic search function
@@ -254,7 +446,7 @@ const ProcessingResults = ({ results, onDocumentReady }) => {
             </span>
           )}
         </h2>
-        <div className="flex space-x-2">
+        <div className="flex items-center space-x-2">
           <button
             onClick={() => setShowSearchDebug(!showSearchDebug)}
             className="btn-light text-sm flex items-center space-x-1"
@@ -262,12 +454,27 @@ const ProcessingResults = ({ results, onDocumentReady }) => {
             <Info className="w-4 h-4" />
             <span>Debug</span>
           </button>
+          
+          {/* Export Format Selector */}
+          <select
+            value={exportFormat}
+            onChange={(e) => setExportFormat(e.target.value)}
+            className="text-sm border border-gray-300 rounded px-2 py-1"
+          >
+            <option value="json">JSON</option>
+            <option value="pdf">PDF</option>
+          </select>
+          
           <button
             onClick={downloadResults}
             className="btn-secondary text-sm flex items-center space-x-1"
           >
-            <Download className="w-4 h-4" />
-            <span>Export</span>
+            {exportFormat === "pdf" ? (
+              <FileDown className="w-4 h-4" />
+            ) : (
+              <Download className="w-4 h-4" />
+            )}
+            <span>Export {exportFormat.toUpperCase()}</span>
           </button>
         </div>
       </div>
