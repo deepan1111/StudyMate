@@ -54,7 +54,7 @@ aiofiles==23.2.1
 aiohttp==3.12.15
 
 # PDF Processing
-PyMuPDF==1.23.8
+PyMuPDF==1.25.1
 pypdf==3.16.4
 
 # Text Processing and NLP
