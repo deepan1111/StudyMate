@@ -688,6 +688,7 @@
 StudyMate Backend - Complete Clean Implementation
 All secrets moved to environment variables
 """
+
 from fastapi import FastAPI, UploadFile, File, HTTPException, Form, Body
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
