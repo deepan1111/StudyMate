@@ -102,8 +102,7 @@ pypdf==3.17.4
 nltk==3.8.1
 sentence-transformers==2.7.0
 transformers==4.40.0
-
-faiss-cpu-windows    # ← FIXED
+faiss-cpu==1.8.0   # ← FIXED
 
 numpy==1.26.4
 scikit-learn==1.4.2
