@@ -193,10 +193,17 @@ export const studyMateService = {
   },
 
   // Create new session
-  createSession: async () => {
-    const response = await api.post("/sessions/create");
-    return response.data;
-  },
+ createSession: async () => {
+  const response = await api.post(
+    "/sessions/create",
+    {}, // ✅ SEND EMPTY BODY
+    {
+      headers: { "Content-Type": "application/json" }
+    }
+  );
+  return response.data;
+},
+
 
   // Get all sessions
   getSessions: async () => {
