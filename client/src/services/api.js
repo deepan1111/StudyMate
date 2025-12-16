@@ -2,7 +2,7 @@
 import axios from "axios";
 
 const API_BASE_URL = "https://studymate-5nw2.onrender.com";
-
+// const API_BASE_URL = "http://localhost:8000";
 // Create axios instance
 const api = axios.create({
   baseURL: API_BASE_URL,
